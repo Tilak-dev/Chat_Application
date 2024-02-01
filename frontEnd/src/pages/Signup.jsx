@@ -2,39 +2,72 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.svg";
+import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import { registerRoute } from "../utils/APIRoutes";
+import "react-toastify/dist/ReactToastify.css";
 
 function Signup() {
-   const handleOnSubmit = (event) => {
-      event.preventDefault();
-      validation();
-   };
-
    const [value, setValue] = useState({
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
    });
+
+   const handleOnSubmit = async (event) => {
+      event.preventDefault();
+      if (validation()) {
+         const { password, confirmPassword, username, email } = value;
+         const { data } = await axios.post(
+            registerRoute,
+            username,
+            email,
+            password
+         );
+      }
+   };
+
+   const toastOption = {
+      position: "bottom-right",
+      autoClose: 8000,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "dark",
+   };
+
    const handleOnChange = (e) => {
       setValue({
          ...value,
          [e.target.name]: e.target.value,
-         position: "bottom-right",
-         autoClose: 8000,
-         pauseOnHover: true,
-         draggable: true,
-         theme: "dark",
       });
    };
 
    const validation = () => {
       const { password, confirmPassword, username, email } = value;
       if (password !== confirmPassword) {
-         toast.error("Password and Confirm Password should be same !", {
-            position: "bottom-right",
-         });
+         toast.error(
+            "Password and Confirm Password should be same !",
+            toastOption
+         );
+         return false;
+      } else if (username.length < 5) {
+         toast.error(
+            "User name should have equal or more than 5 characters !",
+            toastOption
+         );
+         return false;
+      } else if (password.length < 8) {
+         toast.error(
+            "Password should have equal or more than 8 characters  !",
+            toastOption
+         );
+         return false;
+      } else if (email == "") {
+         toast.error("Password should have email !", toastOption);
+         return false;
       }
+      return true;
    };
 
    return (
